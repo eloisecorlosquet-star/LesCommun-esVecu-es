@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Les commun·es vécu·es</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="custom-cursor" id="cursor"></div>
+  <div class="cursor-label" id="cursor-label"></div>
+  <div class="grain-overlay"></div>
+
+  <!-- CARTE -->
+  <div id="app">
+    <div class="map-wrap" id="map-wrap">
+      <div class="map-bg" id="map-bg"></div>
+      <div class="map-pan" id="map-pan">
+        <img src="fondvf.png" alt="Carte" class="map-img" id="map-img">
+        <div class="map-labels" id="map-labels"></div>
+      </div>
+    </div>
+
+    <!-- TYPO HOVER PANEL droite -->
+    <div class="typo-hover-panel hidden" id="typo-hover-panel">
+      <div class="typo-hover-tag" id="typo-hover-tag"></div>
+      <p class="typo-hover-text" id="typo-hover-text"></p>
+    </div>
+
+    <!-- UI -->
+    <div class="map-ui">
+      <div class="ui-logo-wrap">
+        <img src="LOGO.png" alt="Les communes vécues" class="ui-logo" id="ui-logo">
+      </div>
+
+      <!-- NAV haut droite -->
+      <nav class="ui-nav">
+        <span class="ui-counter-nav" id="ui-counter"></span>
+        <button class="nav-btn" id="btn-projet" data-cursor="le projet">Les commun·es vécu·es</button>
+        <button class="nav-btn" id="btn-index" data-cursor="l'index">L'index</button>
+        <button class="nav-btn" id="btn-print" data-cursor="imprimer">Imprimer</button>
+        <button class="nav-btn nav-btn-contrib" id="btn-contrib" data-cursor="contribuer">Contribuer !</button>
+      </nav>
+
+      <!-- ZOOM — sous la nav, une seule instance -->
+      <div class="ui-zoom" id="ui-zoom-main">
+        <button onclick="zoomIn()" data-cursor="zoomer">+</button>
+        <button onclick="zoomOut()" data-cursor="dézoomer">−</button>
+      </div>
+
+      <!-- PHRASE D'ACCUEIL -->
+      <div class="welcome-phrase" id="welcome-phrase">
+        <p>Et pour vous,<br>qu'est-ce que cette carte<br><strong>ne montre pas</strong> <em>encore&nbsp;?</em></p>
+      </div>
+
+      <!-- FILTRES bas -->
+      <div class="ui-filters-bottom" id="ui-filters-bottom">
+        <button class="filter-tag" data-typo="attaches"
+          onmouseenter="showTypoHover('attaches')" onmouseleave="hideTypoHover()"
+          onclick="selectTypo('attaches')" data-cursor="filtrer">Les attaches</button>
+        <button class="filter-tag" data-typo="marees"
+          onmouseenter="showTypoHover('marees')" onmouseleave="hideTypoHover()"
+          onclick="selectTypo('marees')" data-cursor="filtrer">Les marées</button>
+        <button class="filter-tag" data-typo="invisibles"
+          onmouseenter="showTypoHover('invisibles')" onmouseleave="hideTypoHover()"
+          onclick="selectTypo('invisibles')" data-cursor="filtrer">Les invisibles</button>
+        <button class="filter-tag" data-typo="communs"
+          onmouseenter="showTypoHover('communs')" onmouseleave="hideTypoHover()"
+          onclick="selectTypo('communs')" data-cursor="filtrer">Les communs</button>
+      </div>
+
+      <!-- BOUTON ALÉATOIRE -->
+      <button class="btn-random" id="btn-random" onclick="openRandom()" data-cursor="découvrir">→ récit au hasard</button>
+
+      <!-- SÉLECTEUR PALETTE -->
+      <div class="ui-palette" id="ui-palette">
+        <button class="palette-toggle" id="palette-toggle" onclick="togglePalette()" data-cursor="changer la couleur">◐</button>
+        <div class="palette-options hidden" id="palette-options">
+          <button class="pal-btn" data-color="hour" onclick="setPalette(this)" data-cursor="selon l'heure"><span class="pal-swatch pal-swatch-hour">◷</span></button>
+          <button class="pal-btn" data-color="#1A2535" onclick="setPalette(this)" data-cursor="nuit"><span class="pal-swatch" style="background:#1A2535"></span></button>
+          <button class="pal-btn" data-color="#C4A898" onclick="setPalette(this)" data-cursor="aube"><span class="pal-swatch" style="background:#C4A898"></span></button>
+          <button class="pal-btn" data-color="#D4C48A" onclick="setPalette(this)" data-cursor="matin"><span class="pal-swatch" style="background:#D4C48A"></span></button>
+          <button class="pal-btn" data-color="#9AB4C8" onclick="setPalette(this)" data-cursor="10h"><span class="pal-swatch" style="background:#9AB4C8"></span></button>
+          <button class="pal-btn" data-color="#5A7A9A" onclick="setPalette(this)" data-cursor="après-midi"><span class="pal-swatch" style="background:#5A7A9A"></span></button>
+          <button class="pal-btn" data-color="#C47A5A" onclick="setPalette(this)" data-cursor="fin de journée"><span class="pal-swatch" style="background:#C47A5A"></span></button>
+          <button class="pal-btn" data-color="#6A5A7A" onclick="setPalette(this)" data-cursor="soir"><span class="pal-swatch" style="background:#6A5A7A"></span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE PROJET -->
+  <div class="full-page hidden" id="page-projet">
+    <img src="LOGO.png" alt="Les communes vécues" class="page-logo-fixed" onclick="showMap()" data-cursor="la carte">
+    <nav class="page-nav">
+      <button class="nav-btn active-nav">Les commun·es vécu·es</button>
+      <button class="nav-btn" onclick="showPage('index')" data-cursor="l'index">L'index</button>
+      <button class="nav-btn" onclick="showPage('print')" data-cursor="imprimer">Imprimer</button>
+      <button class="nav-btn nav-btn-contrib" onclick="showPage('contrib')" data-cursor="contribuer">Contribuer !</button>
+    </nav>
+    <button class="btn-back-map" onclick="showMap()" data-cursor="la carte">← Retour à la carte</button>
+    <div class="projet-layout">
+      <!-- Colonne gauche : commence SOUS le logo -->
+      <div class="projet-left">
+        <div class="projet-credits-card">
+          <p>CE PROJET A ÉTÉ MENÉ DANS LE CADRE D'UN DIPLÔME EN DESIGN GRAPHIQUE SOCIAL ET ÉTHIQUE, AU CAMPUS FONDERIE DE L'IMAGE DE BAGNOLET (93170), PAR UNE ÉLÈVE ORIGINAIRE DU TERRITOIRE (29260).</p>
+          <p>NÉ DE DISCUSSIONS, DE RENCONTRES ET DE COLLECTES DE RÉCITS MENÉS AUPRÈS DES HABITANT·ES DE LA COMMUNAUTÉ DE COMMUNES LESNEVEN CÔTE DES LÉGENDES.</p>
+          <p>AVEC LE SOUTIEN DE LA COMMUNAUTÉ LESNEVEN CÔTE DES LÉGENDES ET DU PROJET FABRIQUE IMAGINAIRE.</p>
+          <p>MERCI À TOUTES LES PERSONNES QUI ONT OU PRENDRONS PART À CE PROJET.</p>
+          <p class="projet-credit-line">Concept, direction artistique &amp; développement</p>
+          <p class="projet-credit-line">© eloïse corlosquet — Juin, 2026</p>
+          <p class="projet-credit-typo">Font Résistance © students of ENSAD Paris La Générale</p>
+          <p class="projet-credit-typo">Font Self Modern © Bretagne Type Foundry</p>
+          <div class="projet-credits-logos">
+            <img src="monogrammeelo.png" alt="Monogramme" class="monogramme" onerror="this.style.display='none'">
+            <img src="logoCLCL.png" alt="Communauté Lesneven Côte des Légendes" onerror="this.style.display='none'">
+            <img src="logo_fabriqueimaginaire.jpg" alt="Fabrique Imaginaire" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+      <!-- Colonne droite -->
+      <div class="projet-right">
+        <div class="projet-text-panel" style="margin-bottom: 20px;">
+          <p class="projet-intro"><strong>Les commun·es vécu·es</strong> est une cartographie sensible et contributive du territoire de la Communauté de communes Lesneven Côte des Légendes. Elle est composée de récits, de souvenirs, d'attachements, de lieux discrets et de traditions partagées : donnant à voir ce qui structure vraiment la vie dans nos territoires.</p>
+          <p>Chaque récit déposé sur cette carte est un fragment du territoire tel qu'il est vécu, ressenti, habité. Ensemble, ils dessinent ce que les cartes ne montrent pas.</p>
+          <p class="projet-cta">Contribuez.<br>Racontez.</p>
+        </div>
+        <div class="projet-apercu" id="projet-apercu"></div>
+        <div class="projet-text-panel">
+          <p>Cette carte est une ouverture.<br>
+          Elle est née d'un constat : les représentations officielles du territoire ne racontent pas la vie telle qu'elle est construite.<br>
+          Elles montrent les routes. Pas les liens.<br>
+          Elles montrent les équipements. Pas les rituels.<br>
+          Elles montrent les frontières. Pas les appartenances.</p>
+          <p>Cette carte a été conçue pour être un espace de parole commun, un support où chacun·e peut déposer son expérience du territoire, et découvrir celle des autres.</p>
+          <div class="projet-quote">
+            <p>« Selon certain·es, d'après quelques uns et d'autres encore »</p>
+            <span>Filloque &amp; Zammit &amp; Cie</span>
+          </div>
+          <p class="projet-fin">Cette carte est désormais la vôtre.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE INDEX — pas de logo -->
+  <div class="full-page hidden" id="page-index">
+    <nav class="page-nav">
+      <button class="nav-btn" onclick="showPage('projet')" data-cursor="le projet">Les commun·es vécu·es</button>
+      <button class="nav-btn active-nav">L'index</button>
+      <button class="nav-btn" onclick="showPage('print')" data-cursor="imprimer">Imprimer</button>
+      <button class="nav-btn nav-btn-contrib" onclick="showPage('contrib')" data-cursor="contribuer">Contribuer !</button>
+    </nav>
+    <button class="btn-back-map" onclick="showMap()" data-cursor="la carte">← Retour à la carte</button>
+    <div class="index-layout" id="index-layout"></div>
+  </div>
+
+  <!-- PAGE IMPRIMER -->
+  <div class="full-page hidden" id="page-print">
+    <img src="LOGO.png" alt="Les communes vécues" class="page-logo-fixed" onclick="showMap()" data-cursor="la carte">
+    <nav class="page-nav">
+      <button class="nav-btn" onclick="showPage('projet')" data-cursor="le projet">Les commun·es vécu·es</button>
+      <button class="nav-btn" onclick="showPage('index')" data-cursor="l'index">L'index</button>
+      <button class="nav-btn active-nav">Imprimer</button>
+      <button class="nav-btn nav-btn-contrib" onclick="showPage('contrib')" data-cursor="contribuer">Contribuer !</button>
+    </nav>
+    <button class="btn-back-map" onclick="showMap()" data-cursor="la carte">← Retour à la carte</button>
+    <div class="print-page-layout">
+      <div class="print-modal">
+        <p class="print-carte-gen">Carte générée le :</p>
+        <p class="print-date" id="print-date"></p>
+        <p class="print-desc">Archive du territoire à cet instant. Cette version reflète les récits déposés jusqu'à aujourd'hui, chaque impression est une lecture personnelle.<br>La carte continue de grandir avec vos voix, vos endroits, vos souvenirs.</p>
+        <p class="print-choose">Choisissez ce que vous voulez voir apparaître sur votre carte imprimée :</p>
+        <div class="print-filters">
+          <button class="print-filter-btn" data-typo="attaches" onclick="togglePrintFilter('attaches')">Les attaches</button>
+          <button class="print-filter-btn" data-typo="marees" onclick="togglePrintFilter('marees')">Les marées</button>
+          <button class="print-filter-btn" data-typo="invisibles" onclick="togglePrintFilter('invisibles')">Les invisibles</button>
+          <button class="print-filter-btn" data-typo="communs" onclick="togglePrintFilter('communs')">Les communs</button>
+        </div>
+        <button class="print-go-btn" onclick="doPrint()">Imprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE CONTRIBUER -->
+  <div class="full-page hidden" id="page-contrib">
+    <img src="LOGO.png" alt="Les communes vécues" class="page-logo-fixed" onclick="showMap()" data-cursor="la carte">
+    <nav class="page-nav">
+      <button class="nav-btn" onclick="showPage('projet')" data-cursor="le projet">Les commun·es vécu·es</button>
+      <button class="nav-btn" onclick="showPage('index')" data-cursor="l'index">L'index</button>
+      <button class="nav-btn" onclick="showPage('print')" data-cursor="imprimer">Imprimer</button>
+      <button class="nav-btn nav-btn-contrib active-nav">Contribuer !</button>
+    </nav>
+    <button class="btn-back-map" onclick="showMap()" data-cursor="la carte">← Retour à la carte</button>
+    <div class="contrib-page-layout">
+
+      <!-- ÉTAPE 1 -->
+      <div class="contrib-step" id="cstep1">
+        <div class="contrib-modal">
+          <h2 class="contrib-title">Par quelle entrée<br>voulez-vous <strong>raconter</strong><br>votre territoire ?</h2>
+          <div class="contrib-typo-list">
+            <button class="contrib-typo-btn" onclick="pickContribTypo('attaches')">Les attaches</button>
+            <button class="contrib-typo-btn" onclick="pickContribTypo('marees')">Les marées</button>
+            <button class="contrib-typo-btn" onclick="pickContribTypo('invisibles')">Les invisibles</button>
+            <button class="contrib-typo-btn" onclick="pickContribTypo('communs')">Les communs</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 2 -->
+      <div class="contrib-step hidden" id="cstep2">
+        <div class="contrib-modal">
+          <div class="contrib-typo-tag" id="contrib-typo-tag"></div>
+          <h2 class="contrib-title" id="contrib-invite">Racontez une habitude,<br>un souvenir, quelque chose<br>qui vous relie à cet endroit.</h2>
+          <textarea id="recit-text" placeholder="Votre récit"></textarea>
+          <input type="text" id="contrib-name" class="contrib-name-input" placeholder="Votre prénom (ou laisser vide pour anonyme)">
+          <label class="photo-upload-label">
+            <input type="file" accept="image/*" id="photo-input" onchange="previewPhoto(this)" style="display:none">
+            <span id="photo-upload-text">Ajoute ta photographie</span>
+          </label>
+          <div id="photo-preview-wrap" class="hidden">
+            <img id="photo-preview" src="" alt="">
+            <button class="photo-remove" onclick="removePhoto()">×</button>
+          </div>
+          <div class="contrib-nav-btns">
+            <button class="contrib-nav-arrow" onclick="goContribStep(1)">◀</button>
+            <button class="contrib-nav-arrow" onclick="goContribStep(3)">▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉTAPE 3 : situer sur la carte -->
+      <div class="contrib-step hidden" id="cstep3">
+        <div class="contrib-modal contrib-modal-map">
+          <div class="contrib-typo-tag" id="contrib-typo-tag3"></div>
+          <h2 class="contrib-title">Situez votre récit<br>sur la carte</h2>
+          <div class="mini-map-wrap" id="mini-map-wrap">
+            <img src="fondvf.png" alt="Carte" class="mini-map-img" id="mini-map">
+            <div class="mini-map-pin hidden" id="mini-pin">●</div>
+            <div class="mini-map-hint" id="mini-hint">Glissez pour naviguer · Cliquez pour situer · Molette pour zoomer</div>
+          </div>
+          <div class="contrib-nav-btns">
+            <button class="contrib-nav-arrow" onclick="goContribStep(2)">◀</button>
+            <button class="contrib-nav-arrow" onclick="submitContrib()">▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUCCÈS -->
+      <div class="contrib-step hidden" id="cstep-success">
+        <div class="contrib-modal success-wrap">
+          <div class="success-map-preview" id="success-map-preview">
+            <img src="fondvf.png" alt="" id="success-map-img">
+            <div class="success-pin"></div>
+          </div>
+          <p class="success-title">Votre récit est sur la carte.</p>
+          <p class="success-sub">Merci d'avoir contribué.</p>
+          <button class="contrib-nav-arrow" onclick="showMap()">Voir la carte</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox hidden" id="lightbox">
+    <nav class="page-nav lightbox-nav-bar">
+      <button class="nav-btn" onclick="closeLightbox(); showPage('projet')" data-cursor="le projet">Les commun·es vécu·es</button>
+      <button class="nav-btn" onclick="closeLightbox(); showPage('index')" data-cursor="l'index">L'index</button>
+      <button class="nav-btn" onclick="closeLightbox(); showPage('print')" data-cursor="imprimer">Imprimer</button>
+      <button class="nav-btn nav-btn-contrib" onclick="closeLightbox(); showPage('contrib')" data-cursor="contribuer">Contribuer !</button>
+    </nav>
+    <div class="lightbox-layout">
+      <div class="lightbox-photo-wrap">
+        <div class="lightbox-photo-inner">
+          <img src="" alt="" class="lightbox-photo" id="lightbox-photo">
+          <div class="lb-no-photo hidden" id="lb-no-photo"></div>
+        </div>
+        <button class="lb-prev hidden" id="lb-prev" onclick="lbSlide(-1)" data-cursor="précédent">◀</button>
+        <button class="lb-next hidden" id="lb-next" onclick="lbSlide(1)" data-cursor="suivant">▶</button>
+        <button class="lb-contribute-btn-photo" onclick="closeLightbox(); showPage('contrib')" data-cursor="contribuer">J'ajoute mon récit !</button>
+      </div>
+      <div class="lightbox-right">
+        <span class="lb-typo-tag" id="lb-typo-tag"></span>
+        <p class="lb-text" id="lb-text"></p>
+        <span class="lb-author" id="lb-author"></span>
+        <div class="lb-replies" id="lb-replies"></div>
+        <button class="lb-reply-btn" onclick="toggleReplyForm()" data-cursor="répondre">+ Partager un souvenir similaire</button>
+        <div class="lb-reply-form hidden" id="lb-reply-form">
+          <textarea id="reply-text" placeholder="Votre souvenir de ce même endroit…"></textarea>
+          <input type="text" id="reply-name" placeholder="Votre prénom (ou anonyme)" class="contrib-name-input">
+          <button class="contrib-nav-arrow" onclick="submitReply()">Déposer ▶</button>
+        </div>
+        <div class="lb-gallery" id="lb-gallery"></div>
+        <button class="lb-back-map-btn" onclick="closeLightbox()" data-cursor="retour à la carte">← Retour à la carte</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ÉCRAN DE VEILLE -->
+  <div class="screensaver hidden" id="screensaver">
+    <img src="LOGO.png" alt="Les communes vécues" class="screensaver-logo">
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
